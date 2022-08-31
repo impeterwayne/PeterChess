@@ -58,6 +58,8 @@ public abstract class Piece {
         return Objects.hash(piecePosition, pieceAlliance, pieceType, isFirstMove);
     }
 
+    public abstract int locationBonus();
+
 //    public abstract int locationBonus();
 
     public enum PieceType {

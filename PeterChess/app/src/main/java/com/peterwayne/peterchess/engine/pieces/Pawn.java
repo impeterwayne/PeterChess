@@ -117,6 +117,12 @@ public class Pawn extends Piece{
     public Piece movePiece(Move move) {
         return new Pawn(move.getMovedPiece().getPieceAlliance(), move.getDestinationCoordinate());
     }
+
+    @Override
+    public int locationBonus() {
+        return this.pieceAlliance.pawnBonus(this.piecePosition);
+    }
+
     public Piece getPromotionPiece() {
         return new Queen(this.pieceAlliance,this.piecePosition, false);
     }

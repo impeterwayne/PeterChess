@@ -85,7 +85,17 @@ public abstract class Move {
         builder.setMoveMaker(this.board.getCurrentPlayer().getOpponent().getAlliance());
         return builder.build();
     }
-
+    String disambiguationFile() {
+        for(final Move move : this.board.getCurrentPlayer().getLegalMoves())
+        {
+            if(move.getDestinationCoordinate() == this.getDestinationCoordinate()
+                    && !this.equals(move)
+                    && this.movedPiece.getPieceType().equals(move.getMovedPiece().getPieceType())) {
+                return BoardUtils.INSTANCE.getPositionAtCoordinate(this.movedPiece.getPiecePosition()).substring(0,1);
+            }
+        }
+        return "";
+    }
     public static class MajorMove extends Move
     {
         public MajorMove(Board board, Piece movedPiece, int destinationCoordinate) {
@@ -95,7 +105,8 @@ public abstract class Move {
         @NonNull
         @Override
         public String toString() {
-            return null;
+            return movedPiece.getPieceType().toString() + disambiguationFile() +
+                    BoardUtils.INSTANCE.getPositionAtCoordinate(this.destinationCoordinate);
         }
     }
     public static class AttackMove extends Move
@@ -139,6 +150,13 @@ public abstract class Move {
                                final Piece attackedPiece) {
             super(board, movedPiece, destinationCoordinate, attackedPiece);
         }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return movedPiece.getPieceType() + disambiguationFile() + "x" +
+                    BoardUtils.INSTANCE.getPositionAtCoordinate(this.destinationCoordinate);
+        }
     }
     public static final class PawnMove extends Move
     {
@@ -152,7 +170,7 @@ public abstract class Move {
         @NonNull
         @Override
         public String toString() {
-            return super.toString();
+            return BoardUtils.INSTANCE.getPositionAtCoordinate(this.getDestinationCoordinate());
         }
     }
     public static class PawnAttackMove extends AttackMove
@@ -168,7 +186,8 @@ public abstract class Move {
         @NonNull
         @Override
         public String toString() {
-            return super.toString();
+            return BoardUtils.INSTANCE.getPositionAtCoordinate(this.movedPiece.getPiecePosition()).charAt(0) + "x" +
+                    BoardUtils.INSTANCE.getPositionAtCoordinate(this.destinationCoordinate);
         }
     }
     public static final class PawnJump extends Move
@@ -203,13 +222,14 @@ public abstract class Move {
         @NonNull
         @Override
         public String toString() {
-            return super.toString();
+            return BoardUtils.INSTANCE.getPositionAtCoordinate(this.destinationCoordinate);
         }
     }
     public static class PawnPromotion extends Move
     {
         final Move decorateMove;
         final Pawn promotedPawn;
+
         public PawnPromotion(final Move decorateMove)
         {
             super(decorateMove.getBoard(),decorateMove.getMovedPiece(),decorateMove.getDestinationCoordinate());
@@ -246,7 +266,8 @@ public abstract class Move {
         }
         @Override
         public String toString() {
-            return "";
+            //TODO fix promotion move
+            return "promoted";
         }
 
         @Override

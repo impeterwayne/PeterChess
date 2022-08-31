@@ -54,6 +54,11 @@ public class King extends Piece{
     }
 
     @Override
+    public int locationBonus() {
+        return this.pieceAlliance.kingBonus(this.piecePosition);
+    }
+
+    @Override
     public Collection<Move> calculateLegalMoves(Board board) {
         //TODO fix legalMoves when the king is being in check
         final List<Move> legalMoves = new ArrayList<>();

@@ -47,15 +47,18 @@ public class GameUI extends View implements MyObservable {
     private BoardUI boardUI;
     private Piece sourceTile;
     private Piece humanMovedPiece;
+    private final MoveLog moveLog;
     private final GameSetup gameSetup;
     private ArrayList<MyObserver> observers;
 
     public GameUI(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         observers = new ArrayList<>();
+
         chessBoard = Board.createStandardBoard();
         this.boardUI = new BoardUI(context);
         this.gameSetup = new GameSetup();
+        this.moveLog = new MoveLog();
         observers.add(new TableGameAIWatcher());
     }
 
@@ -84,6 +87,8 @@ public class GameUI extends View implements MyObservable {
             final MoveTransition transition = chessBoard.getCurrentPlayer().makeMove(move);
             if (transition.getMoveStatus().isDone()) {
                 chessBoard = transition.getToBoard();
+                moveLog.addMove(move);
+                Log.d("move", moveLog.getMoves().get(moveLog.size()-1).toString());
             }
             sourceTile = null;
             humanMovedPiece = null;
@@ -263,8 +268,41 @@ public class GameUI extends View implements MyObservable {
             super.onPostExecute(move);
             Log.d("done", "done");
             chessBoard = chessBoard.getCurrentPlayer().makeMove(move).getToBoard();
+            moveLog.addMove(move);
+            Log.d("move", moveLog.getMoves().get(moveLog.size()-1).toString());
             invalidate();
             moveMadeUpdate(PlayerType.COMPUTER);
+        }
+    }
+    public static class MoveLog
+    {
+        private final List<Move> moves;
+        MoveLog()
+        {
+            this.moves = new ArrayList<>();
+        }
+        public List<Move> getMoves()
+        {
+            return this.moves;
+        }
+        void addMove(final Move move)
+        {
+            this.moves.add(move);
+        }
+        public int size()
+        {
+            return this.moves.size();
+        }
+        void clear()
+        {
+            this.moves.clear();
+        }
+        Move removeMove(final int index) {
+            return this.moves.remove(index);
+        }
+
+        boolean removeMove(final Move move) {
+            return this.moves.remove(move);
         }
     }
 }

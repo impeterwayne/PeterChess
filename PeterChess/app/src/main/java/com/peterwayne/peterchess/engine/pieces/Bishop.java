@@ -74,6 +74,11 @@ public class Bishop extends Piece{
         return new Bishop(move.getMovedPiece().getPieceAlliance(),move.getDestinationCoordinate());
     }
 
+    @Override
+    public int locationBonus() {
+        return this.pieceAlliance.bishopBonus(this.piecePosition);
+    }
+
     @NonNull
     @Override
     public String toString() {

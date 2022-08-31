@@ -11,7 +11,6 @@ import com.peterwayne.peterchess.engine.board.BoardUtils;
 import com.peterwayne.peterchess.engine.board.Move;
 import com.peterwayne.peterchess.engine.board.MoveTransition;
 import com.peterwayne.peterchess.engine.player.Player;
-
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Observable;

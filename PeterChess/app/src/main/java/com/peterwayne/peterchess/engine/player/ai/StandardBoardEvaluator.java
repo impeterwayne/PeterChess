@@ -44,8 +44,7 @@ public final class StandardBoardEvaluator implements BoardEvaluator{
         int numBishops = 0;
         for(final Piece piece : player.getActivePieces())
         {
-            pieceValuationScore+=piece.getPieceValue();
-//            + piece.locationBonus();
+            pieceValuationScore+=piece.getPieceValue()+ piece.locationBonus();
             if(piece.getPieceType() == Piece.PieceType.BISHOP)
             {
                 numBishops++;
