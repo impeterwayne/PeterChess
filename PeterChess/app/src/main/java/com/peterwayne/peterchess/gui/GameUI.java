@@ -2,6 +2,7 @@ package com.peterwayne.peterchess.gui;
 
 import static com.peterwayne.peterchess.engine.board.BoardUtils.NUM_TILES_PER_ROW;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
@@ -17,6 +18,8 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import androidx.annotation.Nullable;
+
+import com.peterwayne.peterchess.R;
 import com.peterwayne.peterchess.engine.board.Board;
 import com.peterwayne.peterchess.engine.board.BoardUtils;
 import com.peterwayne.peterchess.engine.board.Move;
@@ -28,6 +31,8 @@ import com.peterwayne.peterchess.pattern.MyObservable;
 import com.peterwayne.peterchess.pattern.MyObserver;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
@@ -227,7 +232,33 @@ public class GameUI extends View implements MyObservable {
                     this.coordinate.getY() + TILE_SIZE,
                     this.tileColor);
             assignTilePieceIcon(canvas);
+            highlightLegalMoves(canvas);
             invalidate();
+        }
+
+        private void highlightLegalMoves(final Canvas canvas) {
+            for(final Move move: pieceLegalMoves(chessBoard))
+            {
+                if(move.getDestinationCoordinate() == this.tileId)
+                {
+                    @SuppressLint("UseCompatLoadingForDrawables")
+                    Drawable drawable = getContext().getResources().getDrawable(R.drawable.circle);
+                    Rect imageBounds = new Rect(this.coordinate.getX(),
+                            this.coordinate.getY(),
+                            this.coordinate.getX() + TILE_SIZE,
+                            this.coordinate.getY() + TILE_SIZE);
+                    drawable.setBounds(imageBounds);
+                    drawable.draw(canvas);
+                }
+            }
+        }
+
+        private Collection<Move> pieceLegalMoves(final Board chessBoard) {
+            if(humanMovedPiece!=null &&
+               humanMovedPiece.getPieceAlliance() == chessBoard.getCurrentPlayer().getAlliance()){
+                return humanMovedPiece.calculateLegalMoves(chessBoard);
+            }
+            return Collections.emptyList();
         }
 
         public Coordinate2D getCoordinate() {
