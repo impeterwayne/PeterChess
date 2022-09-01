@@ -51,8 +51,8 @@ public class Pawn extends Piece{
             }
             //Attack candidate
             else if(currentCandidateOffset==7&&
-                    !((BoardUtils.FIRST_COLUMN[this.piecePosition] && this.pieceAlliance.isWhite())
-                     ||(BoardUtils.EIGHTH_COLUMN[this.piecePosition]&&this.pieceAlliance.isBlack()))) {
+                    !((BoardUtils.FIRST_COLUMN[this.piecePosition] && this.pieceAlliance.isBlack())
+                     ||(BoardUtils.EIGHTH_COLUMN[this.piecePosition]&&this.pieceAlliance.isWhite()))) {
                 if(board.getTile(candidateDestinationCoordinate).isTileOccupied())
                 {
                     final Piece pieceOnCandidate = board.getTile(candidateDestinationCoordinate).getPiece();
