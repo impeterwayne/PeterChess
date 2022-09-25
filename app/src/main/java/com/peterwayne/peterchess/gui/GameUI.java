@@ -69,6 +69,10 @@ public class GameUI extends View implements MyObservable {
         observers.add(new TableGameAIWatcher());
         notifyObservers();
     }
+    public void flipBoard() {
+        this.boardDirection = boardDirection.opposite();
+        invalidate();
+    }
 
     private void initBoardDirection() {
         if (gameSetup.getWhitePlayerType() == PlayerType.HUMAN) {
@@ -112,7 +116,6 @@ public class GameUI extends View implements MyObservable {
         new Handler().post(new Runnable() {
             @Override
             public void run() {
-                Log.d("here", "reached");
                 moveMadeUpdate(PlayerType.HUMAN);
                 boardUI.invalidate();
                 invalidate();
@@ -187,6 +190,7 @@ public class GameUI extends View implements MyObservable {
             super.onDraw(canvas);
             for (final TileUI tilePanel : boardDirection.traverse(boardTiles)) {
                 tilePanel.draw(canvas);
+                Log.d("tileId", tilePanel.getTileId()+"");
             }
             invalidate();
         }
@@ -194,7 +198,7 @@ public class GameUI extends View implements MyObservable {
 
     private class TileUI extends View {
 
-        private final Coordinate2D coordinate;
+        private Coordinate2D coordinate;
         private final int tileId;
         private Paint tileColor;
 
@@ -247,6 +251,7 @@ public class GameUI extends View implements MyObservable {
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
+            updateCoordinate();
             assignTileColor();
             canvas.drawRect(this.coordinate.getX(),
                     this.coordinate.getY(),
@@ -256,6 +261,10 @@ public class GameUI extends View implements MyObservable {
             assignTilePieceIcon(canvas);
             highlightLegalMoves(canvas);
             invalidate();
+        }
+
+        private void updateCoordinate() {
+            this.coordinate = calculateTileCoordinate();
         }
 
         private void highlightLegalMoves(final Canvas canvas) {
@@ -307,7 +316,6 @@ public class GameUI extends View implements MyObservable {
             List<TileUI> traverse(final List<TileUI> boardTiles) {
                 return Lists.reverse(boardTiles);
             }
-
             @Override
             BoardDirection opposite() {
                 return NORMAL;

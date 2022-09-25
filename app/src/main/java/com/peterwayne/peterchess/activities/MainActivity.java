@@ -1,12 +1,13 @@
 package com.peterwayne.peterchess.activities;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.peterwayne.peterchess.R;
@@ -28,8 +29,23 @@ public class MainActivity extends AppCompatActivity {
         initGameUI();
         initSpace();
         initNavigation();
+        addEvents();
+    }
 
-
+    private void addEvents() {
+        bottomNavigationView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
+            @SuppressLint("NonConstantResourceId")
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                int id = item.getItemId();
+                switch (id) {
+                    case R.id.nav_flip_board:
+                        gameUI.flipBoard();
+                        break;
+                }
+                return true;
+            }
+        });
     }
 
     private void initSpace() {
@@ -37,7 +53,6 @@ public class MainActivity extends AppCompatActivity {
         LinearLayout space = new LinearLayout(this);
         space.setLayoutParams(params);
         mainView.addView(space);
-        Log.d("nav", "space");
     }
 
     private void initNavigation() {
@@ -48,7 +63,6 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView.setItemIconTintList(null);
         bottomNavigationView.setLayoutParams(params);
         mainView.addView(bottomNavigationView);
-        Log.d("nav", "here");
     }
 
     private void addControls() {
