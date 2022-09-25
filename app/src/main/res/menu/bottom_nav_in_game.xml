@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    tools:ignore="MenuTitle">
+    <item android:id="@+id/nav_previous_move"
+        android:icon="@drawable/ic_back" />
+    <item android:id="@+id/nav_next_move"
+        android:icon="@drawable/ic_forward"/>
+    <item android:id="@+id/nav_flip_board"
+        android:icon="@drawable/ic_flip"/>
+    <item android:id="@+id/nav_resign"
+        android:icon="@drawable/ic_resign"/>
+</menu>
