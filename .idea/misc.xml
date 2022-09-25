@@ -16,6 +16,7 @@
         <entry key="app/src/main/res/layout/activity_setup.xml" value="0.21875" />
         <entry key="app/src/main/res/layout/dialog_game_setup.xml" value="0.36770833333333336" />
         <entry key="app/src/main/res/layout/layout.xml" value="0.2509057971014493" />
+        <entry key="app/src/main/res/menu/bottom_nav_in_game.xml" value="0.18854166666666666" />
         <entry key="app/src/main/res/menu/in_game_bottom_menu.xml" value="0.23177083333333334" />
       </map>
     </option>
