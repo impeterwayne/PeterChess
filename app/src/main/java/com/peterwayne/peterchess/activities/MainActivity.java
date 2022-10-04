@@ -5,12 +5,15 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.peterwayne.peterchess.R;
+import com.peterwayne.peterchess.adapter.MoveLogAdapter;
 import com.peterwayne.peterchess.gui.GameSetup;
 import com.peterwayne.peterchess.gui.GameUI;
 
@@ -20,6 +23,8 @@ public class MainActivity extends AppCompatActivity {
     private BottomNavigationView bottomNavigationView ;
     private GameUI gameUI;
     private GameSetup gameSetup;
+    private RecyclerView moveHistoryUI;
+    private MoveLogAdapter moveLogAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,9 +32,23 @@ public class MainActivity extends AppCompatActivity {
         addControls();
         initGameSetUp();
         initGameUI();
+        initMoveHistoryUI();
         initSpace();
         initNavigation();
         addEvents();
+    }
+
+    private void initMoveHistoryUI() {
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        moveHistoryUI = new RecyclerView(this);
+        moveLogAdapter = new MoveLogAdapter(this);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this,RecyclerView.HORIZONTAL,false);
+        moveHistoryUI.setLayoutManager(linearLayoutManager);
+        gameUI.addObserver(moveLogAdapter);
+        moveHistoryUI.setAdapter(moveLogAdapter);
+        moveHistoryUI.setLayoutParams(params);
+        mainView.addView(moveHistoryUI);
+
     }
 
     private void addEvents() {
@@ -81,4 +100,7 @@ public class MainActivity extends AppCompatActivity {
         gameSetup = new GameSetup(playerType);
     }
 
+    public RecyclerView getMoveHistoryUI() {
+        return moveHistoryUI;
+    }
 }

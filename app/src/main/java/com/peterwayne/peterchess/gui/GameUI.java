@@ -21,11 +21,13 @@ import androidx.annotation.Nullable;
 
 import com.google.common.collect.Lists;
 import com.peterwayne.peterchess.R;
+import com.peterwayne.peterchess.adapter.MoveLogAdapter;
 import com.peterwayne.peterchess.engine.board.Board;
 import com.peterwayne.peterchess.engine.board.BoardUtils;
 import com.peterwayne.peterchess.engine.board.Move;
 import com.peterwayne.peterchess.engine.board.MoveTransition;
 import com.peterwayne.peterchess.engine.pieces.Piece;
+import com.peterwayne.peterchess.engine.player.Player;
 import com.peterwayne.peterchess.engine.player.ai.MoveStrategy;
 import com.peterwayne.peterchess.engine.player.ai.StockAlphaBeta;
 import com.peterwayne.peterchess.pattern.MyObservable;
@@ -67,7 +69,7 @@ public class GameUI extends View implements MyObservable {
         this.boardUI = new BoardUI(context);
         this.moveLog = new MoveLog();
         observers.add(new TableGameAIWatcher());
-        notifyObservers();
+        notifyObservers(null);
     }
     public void flipBoard() {
         this.boardDirection = boardDirection.opposite();
@@ -89,6 +91,11 @@ public class GameUI extends View implements MyObservable {
     }
 
     @Override
+    public boolean performClick() {
+        return super.performClick();
+    }
+
+    @Override
     public boolean onTouchEvent(MotionEvent event) {
         Log.d("touch", pixelToTileCoordinate(event.getX(), event.getY()).toString());
         Log.d("touch", pixelToTileId(event.getX(), event.getY()) + "");
@@ -102,16 +109,20 @@ public class GameUI extends View implements MyObservable {
                 sourceTile = null;
             }
         } else {
-            final Move move = Move.MoveFactory.createMove(chessBoard, sourceTile.getPiecePosition(), tileId);
+            if(tileId!=sourceTile.getPiecePosition())
+            {
+                final Move move = Move.MoveFactory.createMove(chessBoard, sourceTile.getPiecePosition(), tileId);
 
-            final MoveTransition transition = chessBoard.getCurrentPlayer().makeMove(move);
-            if (transition.getMoveStatus().isDone()) {
-                chessBoard = transition.getToBoard();
-                moveLog.addMove(move);
-                Log.d("move", moveLog.getMoves().get(moveLog.size()-1).toString());
+                final MoveTransition transition = chessBoard.getCurrentPlayer().makeMove(move);
+                if (transition.getMoveStatus().isDone()) {
+                    chessBoard = transition.getToBoard();
+                    moveLog.addMove(move);
+                    notifyObservers(moveLog);
+                    Log.d("move", moveLog.getMoves().get(moveLog.size()-1).toString());
+                }
+                sourceTile = null;
+                humanMovedPiece = null;
             }
-            sourceTile = null;
-            humanMovedPiece = null;
         }
         new Handler().post(new Runnable() {
             @Override
@@ -121,8 +132,6 @@ public class GameUI extends View implements MyObservable {
                 invalidate();
             }
         });
-
-
         return super.onTouchEvent(event);
     }
 
@@ -158,15 +167,15 @@ public class GameUI extends View implements MyObservable {
     }
 
     @Override
-    public void notifyObservers() {
+    public void notifyObservers(Object obj) {
         for( MyObserver observer : observers)
         {
-            observer.update();
+            observer.update(obj);
         }
     }
     public void moveMadeUpdate(final PlayerType playerType)
     {
-        notifyObservers();
+        notifyObservers(playerType);
     }
     public class BoardUI extends View {
         final List<TileUI> boardTiles;
@@ -331,14 +340,19 @@ public class GameUI extends View implements MyObservable {
     private class TableGameAIWatcher implements MyObserver
     {
         @Override
-        public void update() {
-            if(gameSetup.isAIPlayer(chessBoard.getCurrentPlayer()))
+        public void update(Object o) {
+            if(o instanceof PlayerType)
             {
-                AIThinkTank thinkTank = new AIThinkTank();
-                thinkTank.execute();
+                Log.d("Curr", chessBoard.getCurrentPlayer().toString());
+                    if(gameSetup.isAIPlayer(chessBoard.getCurrentPlayer()))
+                    {
+                        AIThinkTank thinkTank = new AIThinkTank();
+                        thinkTank.execute();
+                    }
             }
         }
     }
+    @SuppressLint("StaticFieldLeak")
     private class AIThinkTank extends AsyncTask<Void, Void, Move> {
         private AIThinkTank(){};
         @Override
@@ -353,9 +367,9 @@ public class GameUI extends View implements MyObservable {
             Log.d("done", "done");
             chessBoard = chessBoard.getCurrentPlayer().makeMove(move).getToBoard();
             moveLog.addMove(move);
-            Log.d("move", moveLog.getMoves().get(moveLog.size()-1).toString());
             invalidate();
             moveMadeUpdate(PlayerType.COMPUTER);
+            notifyObservers(moveLog);
         }
     }
     public static class MoveLog

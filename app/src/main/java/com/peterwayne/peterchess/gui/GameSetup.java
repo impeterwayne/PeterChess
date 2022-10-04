@@ -4,8 +4,8 @@ import com.peterwayne.peterchess.engine.Alliance;
 import com.peterwayne.peterchess.engine.player.Player;
 
 public class GameSetup {
-    private GameUI.PlayerType whitePlayerType;
-    private GameUI.PlayerType blackPlayerType;
+    private final GameUI.PlayerType whitePlayerType;
+    private final GameUI.PlayerType blackPlayerType;
     public static final String HUMAN_TEXT = "Human";
     public static final String COMPUTER_TEXT = "Computer";
 
@@ -17,8 +17,8 @@ public class GameSetup {
             this.blackPlayerType = GameUI.PlayerType.COMPUTER;
         }else
         {
-            this.blackPlayerType = GameUI.PlayerType.HUMAN;
             this.whitePlayerType = GameUI.PlayerType.COMPUTER;
+            this.blackPlayerType = GameUI.PlayerType.HUMAN;
         }
 
     }

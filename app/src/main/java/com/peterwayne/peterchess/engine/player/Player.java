@@ -43,8 +43,6 @@ public abstract class Player {
                 .filter(move->move.getDestinationCoordinate()==piecePosition)
                 .collect(collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
     }
-
-
     public boolean isMoveLegal(final Move move)
     {
         return this.legalMoves.contains(move);
@@ -57,7 +55,6 @@ public abstract class Player {
     {
         return this.isInCheck && !hasEscapeMove();
     }
-
     public boolean isInStaleMate()
     {
         return !this.isInCheck && !hasEscapeMove();

@@ -50,13 +50,11 @@ public class Board {
         this.currentPlayer = builder.nextMoveMaker.choosePlayerByAlliance(this.whitePlayer,this.blackPlayer);
         this.transitionMove = builder.transitionMove != null ? builder.transitionMove : Move.MoveFactory.getNullMove();
     }
-
     private Collection<Move> calculateLegalMoves(Collection<Piece> pieces) {
         return pieces.stream()
                 .flatMap(piece -> piece.calculateLegalMoves(this).stream())
                 .collect(Collectors.toList());
     }
-
     private Collection<Piece> calculateActivePieces(final List<Tile> gameBoard, final Alliance alliance) {
         final List<Piece> activePieces = new ArrayList<>();
         for(final Tile tile : gameBoard)
@@ -72,7 +70,6 @@ public class Board {
         }
         return ImmutableList.copyOf(activePieces);
     }
-
     private List<Tile> createGameBoard(final Builder builder) {
         final Tile[] tiles = new Tile[NUM_TILES];
         for(int i=0 ; i<NUM_TILES; i++)
