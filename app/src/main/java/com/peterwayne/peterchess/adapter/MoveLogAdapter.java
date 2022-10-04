@@ -30,7 +30,6 @@ public class MoveLogAdapter extends RecyclerView.Adapter<MoveLogAdapter.ViewHold
     {
         movePairs = data;
         notifyDataSetChanged();
-
     }
     @NonNull
     @Override
@@ -65,6 +64,7 @@ public class MoveLogAdapter extends RecyclerView.Adapter<MoveLogAdapter.ViewHold
     public void update(Object moveLog) {
         if(moveLog instanceof GameUI.MoveLog)
         this.setData(convertMoveLogToMovePairs((GameUI.MoveLog)moveLog));
+
     }
 
     private List<MovePair> convertMoveLogToMovePairs(GameUI.MoveLog moveLog) {
