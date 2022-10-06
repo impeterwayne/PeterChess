@@ -22,5 +22,4 @@
             android:exported="false">
         </activity>
     </application>
-
 </manifest>

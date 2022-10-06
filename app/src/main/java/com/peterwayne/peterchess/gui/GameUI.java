@@ -2,33 +2,33 @@ package com.peterwayne.peterchess.gui;
 
 import static com.peterwayne.peterchess.engine.board.BoardUtils.NUM_TILES_PER_ROW;
 
+import static java.lang.Math.PI;
+import static java.lang.Math.atan2;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import androidx.annotation.Nullable;
 
 import com.google.common.collect.Lists;
 import com.peterwayne.peterchess.R;
-import com.peterwayne.peterchess.adapter.MoveLogAdapter;
 import com.peterwayne.peterchess.engine.board.Board;
 import com.peterwayne.peterchess.engine.board.BoardUtils;
 import com.peterwayne.peterchess.engine.board.Move;
 import com.peterwayne.peterchess.engine.board.MoveTransition;
 import com.peterwayne.peterchess.engine.pieces.Piece;
-import com.peterwayne.peterchess.engine.player.Player;
-import com.peterwayne.peterchess.engine.player.ai.MoveStrategy;
 import com.peterwayne.peterchess.engine.player.ai.StockAlphaBeta;
 import com.peterwayne.peterchess.pattern.MyObservable;
 import com.peterwayne.peterchess.pattern.MyObserver;
@@ -37,29 +37,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executor;
-
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.annotations.NonNull;
-import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.core.ObservableEmitter;
-import io.reactivex.rxjava3.core.ObservableOnSubscribe;
-import io.reactivex.rxjava3.core.Observer;
-import io.reactivex.rxjava3.disposables.Disposable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class GameUI extends View implements MyObservable {
     private final int TILE_SIZE = getScreenWidth() / 8;
     private final int MAX_TILE_COORDINATE = 7*TILE_SIZE;
     private Board chessBoard;
-    private BoardUI boardUI;
+    private final BoardUI boardUI;
     private Piece sourceTile;
     private Piece humanMovedPiece;
     private final MoveLog moveLog;
     private final GameSetup gameSetup;
     private BoardDirection boardDirection;
-    private ArrayList<MyObserver> observers;
+    private final ArrayList<MyObserver> observers;
+    private Move instantMove;
     public GameUI(Context context, GameSetup gameSetup) {
         super(context);
         observers = new ArrayList<>();
@@ -71,10 +61,12 @@ public class GameUI extends View implements MyObservable {
         observers.add(new TableGameAIWatcher());
         notifyObservers(null);
     }
+
     public void flipBoard() {
         this.boardDirection = boardDirection.opposite();
         invalidate();
     }
+
 
     private void initBoardDirection() {
         if (gameSetup.getWhitePlayerType() == PlayerType.HUMAN) {
@@ -83,7 +75,10 @@ public class GameUI extends View implements MyObservable {
             boardDirection = BoardDirection.FLIPPED;
         }
     }
-
+    private void updateInstantMove(final Move move)
+    {
+        this.instantMove = move;
+    }
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -109,14 +104,19 @@ public class GameUI extends View implements MyObservable {
                 sourceTile = null;
             }
         } else {
-            if(tileId!=sourceTile.getPiecePosition())
+            final Piece pieceAtTile = chessBoard.getPiece(tileId);
+            if(pieceAtTile!=null && pieceAtTile.getPieceAlliance()==chessBoard.getCurrentPlayer().getAlliance())
+            {
+                sourceTile = chessBoard.getPiece(tileId);
+                humanMovedPiece = sourceTile;
+            }else
             {
                 final Move move = Move.MoveFactory.createMove(chessBoard, sourceTile.getPiecePosition(), tileId);
-
                 final MoveTransition transition = chessBoard.getCurrentPlayer().makeMove(move);
                 if (transition.getMoveStatus().isDone()) {
                     chessBoard = transition.getToBoard();
                     moveLog.addMove(move);
+                    updateInstantMove(move);
                     notifyObservers(moveLog);
                     Log.d("move", moveLog.getMoves().get(moveLog.size()-1).toString());
                 }
@@ -179,11 +179,20 @@ public class GameUI extends View implements MyObservable {
     }
     public class BoardUI extends View {
         final List<TileUI> boardTiles;
-
+        TileUI start, end;
+        Paint paint;
         public BoardUI(Context context) {
             super(context);
             this.boardTiles = new ArrayList<>();
             generateBoardTiles();
+            initPaint();
+        }
+
+        private void initPaint() {
+            paint = new Paint();
+            paint.setStrokeWidth(15);
+            paint.setColor(Color.BLUE);
+            paint.setAlpha(150);
         }
 
         private void generateBoardTiles() {
@@ -197,11 +206,64 @@ public class GameUI extends View implements MyObservable {
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
-            for (final TileUI tilePanel : boardDirection.traverse(boardTiles)) {
-                tilePanel.draw(canvas);
-                Log.d("tileId", tilePanel.getTileId()+"");
+            drawAllTiles(canvas);
+            highlightInstantMove(canvas);
+
+        }
+
+        private void highlightInstantMove(final Canvas canvas) {
+            if(instantMove != null) {
+                for (int i = 0; i < BoardUtils.NUM_TILES; i++) {
+                    TileUI currentTile = boardTiles.get(i);
+                    if(currentTile.getTileId() == instantMove.getCurrentCoordinate()) {
+                        start = boardTiles.get(i);
+                    }
+                    else if(currentTile.getTileId() == instantMove.getDestinationCoordinate()) {
+                        end = boardTiles.get(i);
+                    }
+                }
+                if(start!=null && end!=null) {
+                    drawArrow(paint, canvas,
+                            start.getCoordinate().getX()+TILE_SIZE/2.0f,
+                            start.getCoordinate().getY()+TILE_SIZE/2.0f,
+                            end.getCoordinate().getX()+TILE_SIZE/2.0f,
+                            end.getCoordinate().getY()+TILE_SIZE/2.0f);
+                }
+
             }
-            invalidate();
+        }
+        private void drawArrow(Paint paint, Canvas canvas, float from_x, float from_y, float to_x, float to_y)
+        {
+            float angle,anglerad, radius, lineangle;
+
+            //values to change for other appearance *CHANGE THESE FOR OTHER SIZE ARROWHEADS*
+            radius=50f;
+            angle=75f;
+
+            //some angle calculations
+            anglerad= (float) (PI*angle/180.0f);
+            lineangle= (float) (atan2(to_y-from_y,to_x-from_x));
+
+            //tha line
+            canvas.drawLine(from_x,from_y,to_x,to_y,paint);
+
+            //tha triangle
+            Path path = new Path();
+            path.setFillType(Path.FillType.EVEN_ODD);
+            path.moveTo(to_x, to_y);
+            path.lineTo((float)(to_x-radius*cos(lineangle - (anglerad / 2.0))),
+                    (float)(to_y-radius*sin(lineangle - (anglerad / 2.0))));
+            path.lineTo((float)(to_x-radius*cos(lineangle + (anglerad / 2.0))),
+                    (float)(to_y-radius*sin(lineangle + (anglerad / 2.0))));
+            path.close();
+
+            canvas.drawPath(path, paint);
+        }
+
+        private void drawAllTiles(final Canvas canvas) {
+            for (final TileUI tilePanel : boardDirection.traverse(boardTiles)) {
+            tilePanel.draw(canvas);
+        }
         }
     }
 
@@ -210,6 +272,7 @@ public class GameUI extends View implements MyObservable {
         private Coordinate2D coordinate;
         private final int tileId;
         private Paint tileColor;
+
 
 
         public TileUI(final BoardUI boardUI, final int tileID) {
@@ -258,18 +321,42 @@ public class GameUI extends View implements MyObservable {
         }
 
         @Override
-        protected void onDraw(Canvas canvas) {
+        protected void onDraw(final Canvas canvas) {
             super.onDraw(canvas);
             updateCoordinate();
             assignTileColor();
-            canvas.drawRect(this.coordinate.getX(),
-                    this.coordinate.getY(),
-                    this.coordinate.getX() + TILE_SIZE,
-                    this.coordinate.getY() + TILE_SIZE,
-                    this.tileColor);
+            drawTile(canvas);
             assignTilePieceIcon(canvas);
             highlightLegalMoves(canvas);
-            invalidate();
+            highlightBorder(canvas);
+
+        }
+        public Coordinate2D getCoordinate() {
+            return coordinate;
+        }
+        private void highlightBorder(final Canvas canvas) {
+            if(humanMovedPiece != null &&
+                    humanMovedPiece.getPieceAlliance() == chessBoard.getCurrentPlayer().getAlliance() &&
+                    humanMovedPiece.getPiecePosition() == this.tileId) {
+                Paint strokePaint = new Paint();
+                strokePaint.setStyle(Paint.Style.STROKE);
+                strokePaint.setStrokeWidth(5);
+                strokePaint.setColor(Color.BLUE);
+
+                canvas.drawRect(this.coordinate.getX(),
+                        this.coordinate.getY(),
+                        this.coordinate.getX() + TILE_SIZE,
+                        this.coordinate.getY() + TILE_SIZE,
+                        strokePaint);
+            }
+        }
+
+        private void drawTile(final Canvas canvas) {
+            canvas.drawRect(this.coordinate.getX(),
+                this.coordinate.getY(),
+                this.coordinate.getX() + TILE_SIZE,
+                this.coordinate.getY() + TILE_SIZE,
+                this.tileColor);
         }
 
         private void updateCoordinate() {
@@ -288,6 +375,7 @@ public class GameUI extends View implements MyObservable {
                             this.coordinate.getX() + TILE_SIZE,
                             this.coordinate.getY() + TILE_SIZE);
                     drawable.setBounds(imageBounds);
+                    drawable.setAlpha(150);
                     drawable.draw(canvas);
                 }
             }
@@ -301,9 +389,6 @@ public class GameUI extends View implements MyObservable {
             return Collections.emptyList();
         }
 
-        public Coordinate2D getCoordinate() {
-            return coordinate;
-        }
 
         public int getTileId() {
             return tileId;
@@ -343,7 +428,6 @@ public class GameUI extends View implements MyObservable {
         public void update(Object o) {
             if(o instanceof PlayerType)
             {
-                Log.d("Curr", chessBoard.getCurrentPlayer().toString());
                     if(gameSetup.isAIPlayer(chessBoard.getCurrentPlayer()))
                     {
                         AIThinkTank thinkTank = new AIThinkTank();
@@ -355,6 +439,17 @@ public class GameUI extends View implements MyObservable {
     @SuppressLint("StaticFieldLeak")
     private class AIThinkTank extends AsyncTask<Void, Void, Move> {
         private AIThinkTank(){};
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+        }
+
         @Override
         protected Move doInBackground(Void... voids) {
             final StockAlphaBeta strategy = new StockAlphaBeta(4);
@@ -364,12 +459,14 @@ public class GameUI extends View implements MyObservable {
         @Override
         protected void onPostExecute(Move move) {
             super.onPostExecute(move);
-            Log.d("done", "done");
             chessBoard = chessBoard.getCurrentPlayer().makeMove(move).getToBoard();
             moveLog.addMove(move);
+            notifyObservers(moveLog);
+            updateInstantMove(move);
             invalidate();
             moveMadeUpdate(PlayerType.COMPUTER);
-            notifyObservers(moveLog);
+
+
         }
     }
     public static class MoveLog
