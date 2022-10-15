@@ -465,8 +465,6 @@ public class GameUI extends View implements MyObservable {
             updateInstantMove(move);
             invalidate();
             moveMadeUpdate(PlayerType.COMPUTER);
-
-
         }
     }
     public static class MoveLog
