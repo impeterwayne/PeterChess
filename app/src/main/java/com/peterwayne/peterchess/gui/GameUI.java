@@ -470,9 +470,11 @@ public class GameUI extends View implements MyObservable {
 
         @Override
         protected Move doInBackground(Void... voids) {
+            enableTouch(false);
             final StockAlphaBeta strategy = new StockAlphaBeta(4);
             Move bestMove = strategy.execute(chessBoard);
             return bestMove;
+
         }
         @Override
         protected void onPostExecute(Move move) {
@@ -483,8 +485,19 @@ public class GameUI extends View implements MyObservable {
             updateInstantMove(move);
             invalidate();
             moveMadeUpdate(PlayerType.COMPUTER);
+            enableTouch(true);
         }
     }
+
+    private void enableTouch(boolean clickable) {
+        setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                return !clickable;
+            }
+        });
+    }
+
     public static class MoveLog
     {
         private final List<Move> moves;
