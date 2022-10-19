@@ -6,7 +6,6 @@ import static java.lang.Math.PI;
 import static java.lang.Math.atan2;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
@@ -21,7 +20,6 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-
 import com.google.common.collect.Lists;
 import com.peterwayne.peterchess.R;
 import com.peterwayne.peterchess.engine.board.Board;
@@ -32,7 +30,6 @@ import com.peterwayne.peterchess.engine.pieces.Piece;
 import com.peterwayne.peterchess.engine.player.ai.StockAlphaBeta;
 import com.peterwayne.peterchess.pattern.MyObservable;
 import com.peterwayne.peterchess.pattern.MyObserver;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -50,6 +47,8 @@ public class GameUI extends View implements MyObservable {
     private BoardDirection boardDirection;
     private final ArrayList<MyObserver> observers;
     private Move instantMove;
+
+
     public GameUI(Context context, GameSetup gameSetup) {
         super(context);
         observers = new ArrayList<>();
@@ -60,6 +59,15 @@ public class GameUI extends View implements MyObservable {
         this.moveLog = new MoveLog();
         observers.add(new TableGameAIWatcher());
         notifyObservers(null);
+    }
+
+
+    public void setChessBoard(Board chessBoard) {
+        this.chessBoard = chessBoard;
+    }
+
+    public void setInstantMove(Move instantMove) {
+        this.instantMove = instantMove;
     }
 
     public void flipBoard() {
@@ -135,6 +143,11 @@ public class GameUI extends View implements MyObservable {
         return super.onTouchEvent(event);
     }
 
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        return super.dispatchTouchEvent(event);
+    }
+
     public int getScreenWidth() {
         return Resources.getSystem().getDisplayMetrics().widthPixels;
     }
@@ -164,6 +177,11 @@ public class GameUI extends View implements MyObservable {
     public void removeObserver(MyObserver observer) {
         int i = observers.indexOf(observer);
         if(i>=0) observers.remove(i);
+    }
+
+    @Override
+    public void removeAllObservers() {
+        observers.clear();
     }
 
     @Override

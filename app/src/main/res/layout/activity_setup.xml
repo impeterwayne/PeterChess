@@ -17,12 +17,12 @@
         android:text="@string/txt_computer"
         android:layout_marginVertical="8dp"/>
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btn_load_pgn_file"
+        android:id="@+id/btn_exit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_button"
         android:layout_marginHorizontal="32dp"
         android:textColor="@color/black"
-        android:text="@string/txt_load_pgn"
+        android:text="@string/txt_exit"
         android:layout_marginVertical="8dp"/>
 </LinearLayout>

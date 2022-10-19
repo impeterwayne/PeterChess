@@ -14,13 +14,12 @@ import com.peterwayne.peterchess.activities.MainActivity;
 import com.peterwayne.peterchess.engine.board.Move;
 import com.peterwayne.peterchess.gui.GameUI;
 import com.peterwayne.peterchess.pattern.MyObserver;
-
 import java.util.List;
 
 public class MoveLogAdapter extends RecyclerView.Adapter<MoveLogAdapter.ViewHolder> implements MyObserver {
     private final Context context;
     private List<Move> moveLog;
-    private int selected_position = 0;
+    private int selectedPosition = 0;
     public MoveLogAdapter(Context context) {
         this.context = context;
     }
@@ -29,6 +28,7 @@ public class MoveLogAdapter extends RecyclerView.Adapter<MoveLogAdapter.ViewHold
     {
         moveLog = data;
         notifyDataSetChanged();
+        ((MainActivity) context).getMoveHistoryUI().scrollToPosition(getItemCount()-1);
     }
     @NonNull
     @Override
@@ -49,8 +49,7 @@ public class MoveLogAdapter extends RecyclerView.Adapter<MoveLogAdapter.ViewHold
             holder.txtOrder.setVisibility(View.GONE);
         }
         holder.txtMove.setText(move.toString());
-        ((MainActivity) context).getMoveHistoryUI().smoothScrollToPosition(getItemCount()-1);
-        holder.itemView.setBackgroundColor(selected_position == position ? Color.GRAY : Color.TRANSPARENT);
+        holder.itemView.setBackgroundColor(selectedPosition == position ? Color.GRAY : Color.TRANSPARENT);
     }
 
     @Override
@@ -62,8 +61,11 @@ public class MoveLogAdapter extends RecyclerView.Adapter<MoveLogAdapter.ViewHold
     @Override
     public void update(Object moveLog) {
         if(moveLog instanceof GameUI.MoveLog)
-        this.setData(((GameUI.MoveLog) moveLog).getMoves());
-        selected_position = getItemCount()-1;
+        {
+            this.setData(((GameUI.MoveLog) moveLog).getMoves());
+            selectedPosition = getItemCount()-1;
+        }
+
     }
 
 
@@ -78,7 +80,17 @@ public class MoveLogAdapter extends RecyclerView.Adapter<MoveLogAdapter.ViewHold
 
         @Override
         public void onClick(View view) {
-
         }
+    }
+
+    public int getSelectedPosition() {
+        return selectedPosition;
+    }
+    public void setSelectedPosition(int selectedPosition) {
+        this.selectedPosition = selectedPosition;
+    }
+
+    public List<Move> getMoveLog() {
+        return moveLog;
     }
 }

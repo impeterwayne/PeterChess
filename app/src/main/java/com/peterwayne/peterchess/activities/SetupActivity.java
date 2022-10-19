@@ -5,7 +5,6 @@ import androidx.appcompat.widget.AppCompatButton;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -13,14 +12,13 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ImageView;
 
 import com.google.android.material.imageview.ShapeableImageView;
 import com.peterwayne.peterchess.R;
 import com.peterwayne.peterchess.gui.GameSetup;
 
 public class SetupActivity extends AppCompatActivity {
-    private AppCompatButton btn_play_computer, btn_load_pgn_file;
+    private AppCompatButton btn_play_computer, btn_exit;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,6 +97,6 @@ public class SetupActivity extends AppCompatActivity {
 
     private void addControls() {
         btn_play_computer = findViewById(R.id.btn_play_computer);
-        btn_load_pgn_file = findViewById(R.id.btn_load_pgn_file);
+        btn_exit = findViewById(R.id.btn_exit);
     }
 }

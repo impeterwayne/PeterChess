@@ -7,4 +7,5 @@
     <string name="txt_choose_depth">Choose level</string>
     <string name="txt_start">Start</string>
     <string name="txt_cancel">Cancel</string>
+    <string name="txt_exit">Exit</string>
 </resources>
