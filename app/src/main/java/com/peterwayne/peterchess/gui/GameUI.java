@@ -20,6 +20,9 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.peterwayne.peterchess.R;
 import com.peterwayne.peterchess.engine.board.Board;
@@ -402,6 +405,12 @@ public class GameUI extends View implements MyObservable {
         private Collection<Move> pieceLegalMoves(final Board chessBoard) {
             if(humanMovedPiece!=null &&
                humanMovedPiece.getPieceAlliance() == chessBoard.getCurrentPlayer().getAlliance()){
+                if(humanMovedPiece.getPieceType()== Piece.PieceType.KING && humanMovedPiece.isFirstMove()){
+                    final List<Move> includesCastleMoves = new ArrayList<>();
+                    includesCastleMoves.addAll(chessBoard.getCurrentPlayer().calculateKingCastles(chessBoard.getCurrentPlayer().getLegalMoves(),
+                            chessBoard.getCurrentPlayer().getOpponent().getLegalMoves()));
+                    return ImmutableList.copyOf(Iterables.concat(humanMovedPiece.calculateLegalMoves(chessBoard), includesCastleMoves));
+                }
                 return humanMovedPiece.calculateLegalMoves(chessBoard);
             }
             return Collections.emptyList();

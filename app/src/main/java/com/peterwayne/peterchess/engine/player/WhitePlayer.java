@@ -23,8 +23,8 @@ public final class WhitePlayer extends Player{
         super(board, whiteStandardLegals, blackStandardLegals);
     }
     @Override
-    protected Collection<Move> calculateKingCastles(final Collection<Move> playerLegals,
-                                                    final Collection<Move> opponentLegals) {
+    public Collection<Move> calculateKingCastles(final Collection<Move> playerLegals,
+                                                 final Collection<Move> opponentLegals) {
         if(!hasCastleOpportunities()) {
             return Collections.emptyList();
         }

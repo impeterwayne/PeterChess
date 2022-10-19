@@ -122,5 +122,5 @@ public abstract class Player {
     {
         return legalMoves;
     }
-    protected abstract Collection<Move> calculateKingCastles(Collection<Move> legalMoves, Collection<Move> opponentMoves);
+    public abstract Collection<Move> calculateKingCastles(Collection<Move> legalMoves, Collection<Move> opponentMoves);
 }
